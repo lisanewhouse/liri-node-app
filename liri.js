@@ -1,19 +1,3 @@
-//write the code you need to grab data from keys.js. Then store the keys in a variable
-
-//make it so liri.js can take in one of the following commands:
-	//my-tweets
-		//node liri.js my-tweets
-		//this will show your last 20 tweets and when they were created at in your terminal window
-	//spotify-this-song
-		//node liri.js spotify-this-song '<song name here>'
-		//this will show the following information about a song to terminal: artist(s), the song's name, a preview link of the song from Spotify, the album that song is from
-		//if no song is provided, defauld to "The Sign" by Ace of Base
-		//utilize node-spotify-api package to retrieve info
-		//spotify keys Client ID 
-				//Client Secret 
-	//movie-this
-	//do-what-it-says
-
 var keys = require("./keys.js");
 var fs = require("fs");
 var Twitter = require("twitter");
@@ -21,27 +5,20 @@ var Spotify = require("node-spotify-api");
 var request = require("request");
 
 
-
+//Twitter! node liri.js my-tweets
 var getTweets = function() {
-	
 	var client = new Twitter(keys.twitterKeys);
-
-	var params = {
-		screen_name: "TopFiveRecords_"
-	};
-
+	var params = {screen_name: "TopFiveRecords_", count: 20};
 	client.get("statuses/user_timeline", params, function(error, tweets, response) {
-    if (!error) {
-      for (var i = 0; i < tweets.length; i++) {
-        console.log(tweets[i].created_at);
-        console.log("");
-        console.log(tweets[i].text);
-      }
-    }
-  });
+		if (!error) {
+	      	for (var i = 0; i < tweets.length; i++) {
+		        console.log((i+1) + ": " + tweets[i].text + "\n----------------------");
+      		}
+    	}
+  	});
 };
 
-
+//Spotify! node liri.js spotify-this-song '<song name here>'
 var spotify = new Spotify({
 	id: "68569e3cee98491e97e485fa8f1f8e47",
 	secret: "15851a7933864bf5b697f6544088afeb"
@@ -53,28 +30,22 @@ var getArtist = function(artist) {
 
 var getSpotify = function(songName) {
 	if (songName === undefined) {
-		songName = "What's my age again";
+		songName = "The Sign";
 	}
 
-	spotify.search(
-		{
-			type: "track",
-			query: songName
-		} ,
-		function(err, data) {
+	spotify.search({ type: "track", query: songName }, function(err, data) {
 			if (err) {
-        		console.log("Error occurred: " + err);
-        		return;
+        		return console.log("Error occurred: " + err);
       		}
 
 			var songs = data.tracks.items;
 
 			for (var i = 0; i < songs.length; i++) {
 				console.log(i);
-				console.log("artist(s): " + songs[i].artists.map(getArtist));
-				console.log("song name: " + songs[i].name);
-	        	console.log("preview song: " + songs[i].preview_url);
-	        	console.log("album: " + songs[i].album.name);
+				console.log("Artist(s): " + songs[i].artists.map(getArtist));
+				console.log("Track: " + songs[i].name);
+	        	console.log("Preview: " + songs[i].preview_url);
+	        	console.log("Album: " + songs[i].album.name);
 	        	console.log("-----------------------------------");
 			}	
 		}
@@ -82,8 +53,10 @@ var getSpotify = function(songName) {
 	);
 };
 
+//Request/Omdb node liri.js movie-this 'movie name here'
 var getMovie = function(movieName) {
 	if (movieName === undefined) {
+		//is NOT Mr. Nobody...
 		movieName = "High Fidelity";
 	}
 
@@ -106,6 +79,7 @@ var getMovie = function(movieName) {
   });
 };
 
+//
 var doWhatItSays = function() {
   fs.readFile("random.txt", "utf8", function(error, data) {
     console.log(data);
@@ -141,13 +115,10 @@ var pick = function(caseData, functionData) {
   }
 };
 
-// Function which takes in command line arguments and executes correct function accordigly
 var runThis = function(argOne, argTwo) {
   pick(argOne, argTwo);
 };
 
-// MAIN PROCESS
-// =====================================
 runThis(process.argv[2], process.argv[3]);
 
 
